@@ -138,7 +138,7 @@ $ git clone https://github.com/Yulypso/cryptoFile.git
     <img align="center" src="https://user-images.githubusercontent.com/59794336/147127599-4bff12e1-7218-4929-a931-ccca260ed11e.png"/>
 </p>
 <p align="center" width="100%">
-    <img align="center" width="25%" src="https://user-images.githubusercontent.com/59794336/147127609-a83876ee-9e95-4e77-a814-7c8b6a41a2a8.png"/>
+    <img align="center" width="25%" src="https://user-images.githubusercontent.com/59794336/147369298-75f17ab1-dfba-4e20-b2f3-4b70fa593285.png"/>
 </p>
 
 <br/>
