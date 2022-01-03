@@ -250,10 +250,11 @@ public class TheApplet extends Applet {
         switch (buffer[ISO7816.OFFSET_P1]) {
             case SENDMETADATA:
                 /* check if enough space */
-                if ((short) (3 // metadata required filenameLength, nbTrunks & lastTrunkLength
+                short space = (short) (3 // metadata required filenameLength, nbTrunks & lastTrunkLength
                         + byteToShort(buffer[5]) // filename length
                         + byteArrayToShort(buffer, (short) (4 + byteToShort(buffer[ISO7816.OFFSET_LC]) - 1) // fileLength
-                        )) > getRemainingSpace())
+                        ));
+                if (space > getRemainingSpace() || space > NVRSIZE)
                     ISOException.throwIt(ISO7816.SW_FILE_FULL);
                 else
                     Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, NVR, getNVRFreeOffset(),

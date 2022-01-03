@@ -499,18 +499,19 @@ public class TheClient {
 		/* metadata */
 		byte filenameLength = (byte) filename.length(); // 1 byte
 		byte[] filename_b = filename.getBytes(); // n bytes
-		short fileLength = (short) f.length(); // 2 bytes
 
 		if (filenameLength < 0) {
-			System.err.println("[Error]: Filename is too large (size must be <= 127)");
+			System.err.println("[Error]: Filename is too large: " + filenameLength
+					+ " characters (length must be <= 127 characters)");
 			return;
 		}
 
-		if (fileLength < 0) {
-			System.err.println("[Error]: File is too large (size must be <= 32767)");
+		if (f.length() < 0 || f.length() > 32767) {
+			System.err.println("[Error]: File is too large: " + f.length() + " bytes (size must be <= 32767 bytes)");
 			return;
 		}
 
+		short fileLength = (short) f.length(); // 2 bytes
 		short LC = (short) (filenameLength + 3);
 		byte[] payload = new byte[LC + 5];
 		payload[0] = CLA;
@@ -526,7 +527,7 @@ public class TheClient {
 		cmd = new CommandAPDU(payload);
 		resp = this.sendAPDU(cmd, DISPLAY);
 
-		System.out.println("File data length: " + byteArrayToShort(payload, (short) (payload.length - 2)));
+		System.out.println("File data length: " + byteArrayToShort(payload, (short) (payload.length - 2)) + " bytes");
 
 		if (getExceptionMessage("ADDFILE (METADATA)",
 				this.apdu2string(resp).trim().substring(this.apdu2string(resp).trim().length() - 5))) {
