@@ -13,7 +13,7 @@ public class TheClient {
 
 	/* APDU */
 	private static short DMS = 255; // DATA MAX SIZE
-	private static short DMS_DES = 8; // DATA MAX SIZE for DES
+	private static short DMS_DES = 248; // DATA MAX SIZE for DES
 	private static final byte CLA = (byte) 0x37;
 	private static final byte P1 = (byte) 0x00;
 	private static final byte P2 = (byte) 0x00;
@@ -253,11 +253,11 @@ public class TheClient {
 	}
 
 	private static byte[] addPadding(byte[] data, long fileLength) {
-		short paddingSize = (short) (DMS_DES - (fileLength % 8));
-		byte[] paddingData = new byte[DMS_DES];
+		short paddingSize = (short) (8 - (fileLength % 8));
+		byte[] paddingData = new byte[(short) (data.length + paddingSize)];
 
 		System.arraycopy(data, 0, paddingData, 0, (short) data.length);
-		for (short i = (short) data.length; i < DMS_DES; ++i)
+		for (short i = (short) data.length; i < (data.length + paddingSize); ++i)
 			paddingData[i] = shortToByteArray(paddingSize)[1];
 
 		return paddingData;
@@ -674,7 +674,7 @@ public class TheClient {
 					outputStream.write(by);
 				++i;
 
-				if (by != -1 && i == DMS_DES) {
+				if ((by != -1 && i == DMS_DES) || (by == -1 && i > 1)) {
 					byte data[] = outputStream.toByteArray();
 					outputStream = new ByteArrayOutputStream();
 					i = 0;
@@ -682,14 +682,14 @@ public class TheClient {
 					System.out.print("\n" + "Trunk #" + cpt + " [length: " + data.length + "]");
 					System.out.println("");
 
-					byte[] payload = new byte[DMS_DES + 6];
+					byte[] payload = new byte[data.length + 6];
 					payload[0] = CLA;
 					payload[1] = DECRYPTFILE;
 					payload[2] = P1;
 					payload[3] = P2;
-					payload[4] = (byte) DMS_DES;
-					System.arraycopy(data, 0, payload, 5, DMS_DES);
-					payload[payload.length - 1] = (byte) DMS_DES;
+					payload[4] = (byte) data.length;
+					System.arraycopy(data, 0, payload, 5, data.length);
+					payload[payload.length - 1] = (byte) data.length;
 
 					cmd = new CommandAPDU(payload);
 					resp = this.sendAPDU(cmd, DISPLAY);
@@ -702,7 +702,7 @@ public class TheClient {
 							DataOutputStream dos = new DataOutputStream(stream);
 							data = new byte[bytes.length - 2];
 							System.arraycopy(bytes, 0, data, 0, bytes.length - 2);
-							if (cpt++ * DMS_DES == f.length())
+							if (cpt++ * DMS_DES >= f.length())
 								data = removePadding(data);
 							dos.write(data);
 
@@ -755,26 +755,28 @@ public class TheClient {
 				if (by != -1)
 					outputStream.write(by);
 				++i;
-
 				if ((by != -1 && i == DMS_DES) || (by == -1 && i > 1)) {
 					byte data[] = outputStream.toByteArray();
 					outputStream = new ByteArrayOutputStream();
 					i = 0;
 
-					data = addPadding(data, f.length());
+					if (by == -1)
+						data = addPadding(data, f.length());
+
 					System.out.print("\n" + "Trunk #" + cpt++ + " [length: " + data.length + "]");
 					System.out.println("");
 
-					byte[] payload = new byte[DMS_DES + 6];
+					byte[] payload = new byte[data.length + 6];
 					payload[0] = CLA;
 					payload[1] = ENCRYPTFILE;
 					payload[2] = P1;
 					payload[3] = P2;
-					payload[4] = (byte) DMS_DES;
-					System.arraycopy(data, 0, payload, 5, DMS_DES);
-					payload[payload.length - 1] = (byte) DMS_DES;
+					payload[4] = (byte) data.length;
+					System.arraycopy(data, 0, payload, 5, data.length);
+					payload[payload.length - 1] = (byte) data.length;
 
 					cmd = new CommandAPDU(payload);
+					displayAPDU(cmd);
 					resp = this.sendAPDU(cmd, DISPLAY);
 
 					if (getExceptionMessage("ENCRYPTFILE (DATA TRUNK) " + (cpt - 1),
