@@ -34,8 +34,8 @@ public class TheApplet extends Applet {
             keyDES, DES_ECB_NOPAD, DES_CBC_NOPAD;
 
     /* CARD MEMORY */
-    private final static short NVRSIZE = (short) 2048/* 32767 */; // production
-    // private final static short NVRSIZE = (short) 2000; // development
+    private final static short NVRSIZE = (short) 32767; // production
+    // private final static short NVRSIZE = (short) 2048; // development
     private static byte[] NVR = new byte[NVRSIZE];
     static final byte[] theDESKey = new byte[] { (byte) 0xCA, (byte) 0xCA, (byte) 0xCA, (byte) 0xCA, (byte) 0xCA,
             (byte) 0xCA, (byte) 0xCA, (byte) 0xCA };
